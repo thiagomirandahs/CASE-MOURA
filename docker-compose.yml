@@ -1,0 +1,26 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: gestaocoletas-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "GestaoColetas@2026"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+
+  api:
+    build: .
+    container_name: gestaocoletas-api
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # Dentro do Docker, a API fala com o banco pelo nome do serviço ("db").
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=GestaoColetas;User Id=sa;Password=GestaoColetas@2026;TrustServerCertificate=True;"
+    ports:
+      - "8080:8080"
+
+volumes:
+  sqldata:
