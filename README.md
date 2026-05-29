@@ -20,10 +20,10 @@ O back-end segue Clean Architecture, separado em camadas:
 
 ```
 src/
-  CaseMoura.Domain          entidades e regras de negócio (o núcleo)
-  CaseMoura.Application     casos de uso, DTOs e contratos (interfaces)
-  CaseMoura.Infrastructure  acesso a dados (EF Core / SQL Server)
-  CaseMoura.WebAPI          a API: controllers e configuração
+  GestaoColetas.Domain          entidades e regras de negócio (o núcleo)
+  GestaoColetas.Application     casos de uso, DTOs e contratos (interfaces)
+  GestaoColetas.Infrastructure  acesso a dados (EF Core / SQL Server)
+  GestaoColetas.WebAPI          a API: controllers e configuração
 ```
 
 A regra principal: as camadas de fora dependem das de dentro, e o Domain não depende

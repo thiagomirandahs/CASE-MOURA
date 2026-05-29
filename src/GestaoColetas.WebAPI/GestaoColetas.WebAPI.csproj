@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CaseMoura.Application\CaseMoura.Application.csproj" />
-    <ProjectReference Include="..\CaseMoura.Infrastructure\CaseMoura.Infrastructure.csproj" />
+    <ProjectReference Include="..\GestaoColetas.Application\GestaoColetas.Application.csproj" />
+    <ProjectReference Include="..\GestaoColetas.Infrastructure\GestaoColetas.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

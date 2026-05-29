@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\CaseMoura.Domain\CaseMoura.Domain.csproj" />
+    <ProjectReference Include="..\GestaoColetas.Application\GestaoColetas.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
