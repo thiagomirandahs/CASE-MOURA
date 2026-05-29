@@ -17,6 +17,7 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IColetaRepository, ColetaRepository>();
+        services.AddScoped<IMotoristaRepository, MotoristaRepository>();
 
         return services;
     }

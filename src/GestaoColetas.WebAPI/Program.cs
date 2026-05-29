@@ -21,6 +21,7 @@ builder.Services.AddInfrastructure(
 
 // Casos de uso da aplicação
 builder.Services.AddScoped<IColetaService, ColetaService>();
+builder.Services.AddScoped<IMotoristaService, MotoristaService>();
 
 var app = builder.Build();
 
