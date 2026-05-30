@@ -141,6 +141,20 @@ tr.alta td:first-child { border-left: 4px solid #dc2626; font-weight: 700; }
 .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .modal-head h3 { margin: 0; font-size: 1.1rem; }
 .x { background: transparent; color: #64748b; font-size: 1.3rem; padding: 0 6px; line-height: 1; }
+
+/* Popup de aviso/erro (com botão OK) */
+.modal-aviso { max-width: 380px; text-align: center; }
+.modal-aviso .aviso-icone {
+  width: 52px; height: 52px; border-radius: 50%; background: #fee2e2; color: #dc2626;
+  font-size: 1.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  margin: 2px auto 12px;
+}
+.modal-aviso h3 { margin: 0 0 8px; font-size: 1.15rem; color: #1f2430; }
+.modal-aviso p { margin: 0 0 18px; color: #475569; font-size: 0.9rem; }
+.modal-aviso button { min-width: 120px; }
+.aviso-acoes { display: flex; gap: 10px; justify-content: center; }
+.aviso-acoes button { min-width: 130px; }
+.aviso-acoes button.perigo { background: #dc2626; }
 .form { display: flex; flex-direction: column; gap: 9px; }
 .form .full { margin-top: 6px; }
 .campo { display: flex; flex-direction: column; gap: 4px; }
