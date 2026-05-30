@@ -1,0 +1,29 @@
+name: CI
+
+# Roda a cada push e pull request na main: compila e executa os testes.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-e-testes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar o .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restaurar dependências
+        run: dotnet restore
+
+      - name: Compilar (Release)
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Rodar os testes
+        run: dotnet test --no-build --configuration Release --verbosity normal

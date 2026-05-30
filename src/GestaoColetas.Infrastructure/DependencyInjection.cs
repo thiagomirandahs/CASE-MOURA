@@ -11,10 +11,18 @@ namespace GestaoColetas.Infrastructure;
 /// </summary>
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services, string connectionString, string? provider = null)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        {
+            // SQL Server no local/Docker; PostgreSQL na nuvem — escolhido por configuracao.
+            var ehPostgres = (provider ?? "").Trim().ToLowerInvariant() == "postgres";
+            if (ehPostgres)
+                options.UseNpgsql(connectionString);
+            else
+                options.UseSqlServer(connectionString);
+        });
 
         services.AddScoped<IColetaRepository, ColetaRepository>();
         services.AddScoped<IMotoristaRepository, MotoristaRepository>();
