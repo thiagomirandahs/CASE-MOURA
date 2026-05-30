@@ -1,3 +1,4 @@
+using System.Text;
 using GestaoColetas.Application.DTOs;
 using GestaoColetas.Application.Services;
 using GestaoColetas.Domain.Enums;
@@ -27,6 +28,24 @@ public class ColetasController : ControllerBase
     {
         var resultado = await _service.ListarAsync(status, clienteId, inicio, fim, pagina, tamanhoPagina);
         return Ok(resultado);
+    }
+
+    /// <summary>Exporta as coletas (com os mesmos filtros) em CSV — abre direto no Excel.</summary>
+    [HttpGet("exportar")]
+    public async Task<IActionResult> Exportar(
+        [FromQuery] StatusColeta? status,
+        [FromQuery] int? clienteId,
+        [FromQuery] DateTime? inicio,
+        [FromQuery] DateTime? fim)
+    {
+        var csv = await _service.ExportarCsvAsync(status, clienteId, inicio, fim);
+        // BOM do UTF-8 na frente: faz o Excel abrir o arquivo com os acentos corretos.
+        var conteudo = Encoding.UTF8.GetBytes(csv);
+        var bom = Encoding.UTF8.GetPreamble();
+        var bytes = new byte[bom.Length + conteudo.Length];
+        Buffer.BlockCopy(bom, 0, bytes, 0, bom.Length);
+        Buffer.BlockCopy(conteudo, 0, bytes, bom.Length, conteudo.Length);
+        return File(bytes, "text/csv", $"coletas_{DateTime.UtcNow:yyyy-MM-dd}.csv");
     }
 
     /// <summary>Busca uma coleta pelo id.</summary>

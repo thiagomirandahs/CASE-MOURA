@@ -13,6 +13,8 @@ public interface IColetaService
     Task<PagedResult<ColetaResponse>> ListarAsync(
         StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim, int pagina, int tamanhoPagina);
 
+    Task<string> ExportarCsvAsync(StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim);
+
     Task<ColetaResponse?> ObterPorIdAsync(int id);
 
     Task AtribuirMotoristaEVeiculoAsync(int id, AtribuirMotoristaVeiculoRequest request);

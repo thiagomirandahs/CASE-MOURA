@@ -15,6 +15,10 @@ public interface IColetaRepository
     Task<(IReadOnlyList<SolicitacaoColeta> Itens, int Total)> ListarAsync(
         StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim, int pagina, int tamanhoPagina);
 
+    // Mesmos filtros da listagem, porém sem paginar — usado na exportação.
+    Task<IReadOnlyList<SolicitacaoColeta>> ListarTodasAsync(
+        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim);
+
     Task<int> ContarAsync();
 
     Task<bool> ClienteExisteAsync(int clienteId);

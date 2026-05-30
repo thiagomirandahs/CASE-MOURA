@@ -1,3 +1,4 @@
+using System.Text;
 using GestaoColetas.Application.DTOs;
 using GestaoColetas.Application.Interfaces;
 using GestaoColetas.Domain.Entities;
@@ -39,6 +40,51 @@ public class ColetaService : IColetaService
         var (itens, total) = await _repo.ListarAsync(status, clienteId, inicio, fim, pagina, tamanhoPagina);
         var resposta = itens.Select(MapToResponse).ToList();
         return new PagedResult<ColetaResponse>(resposta, total, pagina, tamanhoPagina);
+    }
+
+    public async Task<string> ExportarCsvAsync(
+        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim)
+    {
+        var coletas = (await _repo.ListarTodasAsync(status, clienteId, inicio, fim))
+            .Select(MapToResponse)
+            .ToList();
+
+        var sb = new StringBuilder();
+        sb.AppendLine(string.Join(';', new[]
+        {
+            "Numero", "Cliente", "Remetente", "Endereco Remetente", "Destinatario", "Endereco Destinatario",
+            "Prioridade", "Status", "Em Atraso", "Data Solicitacao", "Data Prevista",
+            "Motorista", "Veiculo", "Qtd Ocorrencias", "Ocorrencias", "Observacoes"
+        }));
+
+        foreach (var c in coletas)
+        {
+            // Junta todas as ocorrências da coleta numa célula só: "data - usuario: descricao | ..."
+            var ocorrencias = string.Join(" | ", c.Ocorrencias.Select(o =>
+                $"{o.DataHora:dd/MM/yyyy HH:mm} - {o.UsuarioResponsavel}: {o.Descricao}"));
+
+            sb.AppendLine(string.Join(';', new[]
+            {
+                Csv(c.Numero),
+                Csv(c.ClienteNome),
+                Csv(c.RemetenteNome),
+                Csv(c.RemetenteEndereco),
+                Csv(c.DestinatarioNome),
+                Csv(c.DestinatarioEndereco),
+                Csv(c.Prioridade),
+                Csv(c.Status),
+                c.EmAtraso ? "Sim" : "Nao",
+                c.DataSolicitacao.ToString("dd/MM/yyyy"),
+                c.DataColetaPrevista.ToString("dd/MM/yyyy"),
+                Csv(c.MotoristaNome),
+                Csv(c.VeiculoPlaca),
+                c.Ocorrencias.Count.ToString(),
+                Csv(ocorrencias),
+                Csv(c.Observacoes)
+            }));
+        }
+
+        return sb.ToString();
     }
 
     public async Task<ColetaResponse?> ObterPorIdAsync(int id)
@@ -95,6 +141,15 @@ public class ColetaService : IColetaService
     {
         var proximo = await _repo.ContarAsync() + 1;
         return $"COL-{DateTime.UtcNow:yyyy}-{proximo:D4}";
+    }
+
+    // Escapa um campo de texto para CSV: se tiver ; " ou quebra de linha, envolve em aspas.
+    private static string Csv(string? valor)
+    {
+        valor ??= "";
+        if (valor.Contains(';') || valor.Contains('"') || valor.Contains('\n') || valor.Contains('\r'))
+            return "\"" + valor.Replace("\"", "\"\"") + "\"";
+        return valor;
     }
 
     private static ColetaResponse MapToResponse(SolicitacaoColeta c) => new(

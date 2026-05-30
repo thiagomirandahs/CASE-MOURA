@@ -22,24 +22,24 @@ public class ColetaRepository : IColetaRepository
     public async Task<(IReadOnlyList<SolicitacaoColeta> Itens, int Total)> ListarAsync(
         StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim, int pagina, int tamanhoPagina)
     {
-        var query = ComIncludes(_db.Coletas);
-
-        if (status.HasValue) query = query.Where(c => c.Status == status.Value);
-        if (clienteId.HasValue) query = query.Where(c => c.ClienteId == clienteId.Value);
-        if (inicio.HasValue) query = query.Where(c => c.DataColetaPrevista >= inicio.Value);
-        if (fim.HasValue) query = query.Where(c => c.DataColetaPrevista <= fim.Value);
+        var query = AplicarFiltros(ComIncludes(_db.Coletas), status, clienteId, inicio, fim);
 
         var total = await query.CountAsync();
 
         // Prioridade Alta primeiro, depois pela data prevista, e então pagina no banco.
-        var itens = await query
-            .OrderBy(c => c.Prioridade == Prioridade.Alta ? 0 : c.Prioridade == Prioridade.Normal ? 1 : 2)
-            .ThenBy(c => c.DataColetaPrevista)
+        var itens = await OrdenarPorPrioridade(query)
             .Skip((pagina - 1) * tamanhoPagina)
             .Take(tamanhoPagina)
             .ToListAsync();
 
         return (itens, total);
+    }
+
+    public async Task<IReadOnlyList<SolicitacaoColeta>> ListarTodasAsync(
+        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim)
+    {
+        var query = AplicarFiltros(ComIncludes(_db.Coletas), status, clienteId, inicio, fim);
+        return await OrdenarPorPrioridade(query).ToListAsync();
     }
 
     public Task<int> ContarAsync() => _db.Coletas.CountAsync();
@@ -70,4 +70,20 @@ public class ColetaRepository : IColetaRepository
          .Include(c => c.Motorista)
          .Include(c => c.Veiculo)
          .Include(c => c.Ocorrencias);
+
+    // Aplica os filtros opcionais (situação, cliente, período) — compartilhado entre listar e exportar.
+    private static IQueryable<SolicitacaoColeta> AplicarFiltros(
+        IQueryable<SolicitacaoColeta> query, StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim)
+    {
+        if (status.HasValue) query = query.Where(c => c.Status == status.Value);
+        if (clienteId.HasValue) query = query.Where(c => c.ClienteId == clienteId.Value);
+        if (inicio.HasValue) query = query.Where(c => c.DataColetaPrevista >= inicio.Value);
+        if (fim.HasValue) query = query.Where(c => c.DataColetaPrevista <= fim.Value);
+        return query;
+    }
+
+    // Prioridade Alta no topo, depois Normal, por fim Baixa; dentro de cada grupo, pela data prevista.
+    private static IQueryable<SolicitacaoColeta> OrdenarPorPrioridade(IQueryable<SolicitacaoColeta> query) =>
+        query.OrderBy(c => c.Prioridade == Prioridade.Alta ? 0 : c.Prioridade == Prioridade.Normal ? 1 : 2)
+             .ThenBy(c => c.DataColetaPrevista);
 }
