@@ -7,6 +7,13 @@ rastreabilidade do que acontece em cada coleta.
 
 > Projeto do case técnico pra vaga de Desenvolvedor Web Jr.
 
+## Demo ao vivo
+
+- **Aplicação:** https://case-moura-web.onrender.com — entre com **admin** / **admin123**
+- **API (Swagger):** https://case-moura.onrender.com/swagger/index.html
+
+> Está numa hospedagem gratuita que "dorme" quando fica parada: a primeira visita pode levar uns ~50s pra acordar (se aparecer "Not Found", é só recarregar uma vez).
+
 ## O que dá pra fazer
 
 - Abrir uma solicitação de coleta (cliente, remetente, destinatário, data prevista e prioridade)
