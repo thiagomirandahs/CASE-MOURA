@@ -4,12 +4,12 @@ WORKDIR /src
 
 # Copia primeiro só os .csproj pra aproveitar o cache no restore
 COPY global.json ./
-COPY GestaoColetas.sln ./
 COPY src/GestaoColetas.Domain/GestaoColetas.Domain.csproj src/GestaoColetas.Domain/
 COPY src/GestaoColetas.Application/GestaoColetas.Application.csproj src/GestaoColetas.Application/
 COPY src/GestaoColetas.Infrastructure/GestaoColetas.Infrastructure.csproj src/GestaoColetas.Infrastructure/
 COPY src/GestaoColetas.WebAPI/GestaoColetas.WebAPI.csproj src/GestaoColetas.WebAPI/
-RUN dotnet restore GestaoColetas.sln
+# Restaura só a API (e seus projetos referenciados) — o projeto de testes fica de fora do build da imagem
+RUN dotnet restore src/GestaoColetas.WebAPI/GestaoColetas.WebAPI.csproj
 
 # Copia o resto do código e publica
 COPY . .
