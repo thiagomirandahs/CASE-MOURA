@@ -17,7 +17,7 @@ public record CriarColetaRequest(
 public record AtribuirMotoristaVeiculoRequest(int MotoristaId, int VeiculoId);
 
 // Entrada: registrar uma ocorrência.
-public record RegistrarOcorrenciaRequest(string Descricao, string UsuarioResponsavel);
+public record RegistrarOcorrenciaRequest(string Descricao);
 
 // Saída: uma ocorrência.
 public record OcorrenciaResponse(int Id, string Descricao, DateTime DataHora, string UsuarioResponsavel);
@@ -37,6 +37,7 @@ public record ColetaResponse(
     string Prioridade,
     string Status,
     bool PrioridadeAlta,
+    bool EmAtraso,
     int? MotoristaId,
     string? MotoristaNome,
     int? VeiculoId,

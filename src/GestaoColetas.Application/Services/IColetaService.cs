@@ -10,13 +10,15 @@ public interface IColetaService
 {
     Task<ColetaResponse> CriarAsync(CriarColetaRequest request);
 
-    Task<IReadOnlyList<ColetaResponse>> ListarAsync(
-        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim);
+    Task<PagedResult<ColetaResponse>> ListarAsync(
+        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim, int pagina, int tamanhoPagina);
 
     Task<ColetaResponse?> ObterPorIdAsync(int id);
 
     Task AtribuirMotoristaEVeiculoAsync(int id, AtribuirMotoristaVeiculoRequest request);
     Task MarcarComoColetadaAsync(int id);
     Task CancelarAsync(int id);
-    Task RegistrarOcorrenciaAsync(int id, RegistrarOcorrenciaRequest request);
+    Task RegistrarOcorrenciaAsync(int id, string descricao, string usuarioResponsavel);
+
+    Task<DashboardResponse> ObterDashboardAsync();
 }

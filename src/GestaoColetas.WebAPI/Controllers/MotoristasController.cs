@@ -1,9 +1,11 @@
 using GestaoColetas.Application.DTOs;
 using GestaoColetas.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GestaoColetas.WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class MotoristasController : ControllerBase

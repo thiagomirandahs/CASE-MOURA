@@ -1,3 +1,4 @@
+using GestaoColetas.Application.DTOs;
 using GestaoColetas.Domain.Entities;
 using GestaoColetas.Domain.Enums;
 
@@ -11,8 +12,8 @@ public interface IColetaRepository
 {
     Task<SolicitacaoColeta?> ObterPorIdAsync(int id);
 
-    Task<IReadOnlyList<SolicitacaoColeta>> ListarAsync(
-        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim);
+    Task<(IReadOnlyList<SolicitacaoColeta> Itens, int Total)> ListarAsync(
+        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim, int pagina, int tamanhoPagina);
 
     Task<int> ContarAsync();
 
@@ -22,4 +23,6 @@ public interface IColetaRepository
 
     Task AdicionarAsync(SolicitacaoColeta coleta);
     Task SalvarAlteracoesAsync();
+
+    Task<DashboardResponse> ObterDashboardAsync();
 }
