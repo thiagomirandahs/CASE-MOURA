@@ -85,6 +85,7 @@ export default function Coletas() {
   const [ocorrenciaColetaId, setOcorrenciaColetaId] = useState(null);
   const [novaOcorrencia, setNovaOcorrencia] = useState("");
   const [confirmar, setConfirmar] = useState(null);
+  const [registrando, setRegistrando] = useState(false);
 
   async function carregar() {
     setCarregando(true);
@@ -167,15 +168,23 @@ export default function Coletas() {
     });
   }
 
-  function adicionarOcorrencia(e) {
+  async function adicionarOcorrencia(e) {
     e.preventDefault();
+    if (registrando) return; // trava envio duplicado (double-click)
     const id = ocorrenciaColetaId;
     const desc = novaOcorrencia.trim();
     if (!desc) return;
-    acao(async () => {
+    setRegistrando(true);
+    setErro(null);
+    try {
       await registrarOcorrencia(id, desc);
       setNovaOcorrencia("");
-    });
+      await carregar();
+    } catch (err) {
+      setErro(err.message);
+    } finally {
+      setRegistrando(false);
+    }
   }
 
   function cancelar(id) {
@@ -378,7 +387,7 @@ export default function Coletas() {
               <span>Nova ocorrência</span>
               <input required placeholder="Ex.: endereço errado, cliente ausente..." value={novaOcorrencia} onChange={(e) => setNovaOcorrencia(e.target.value)} />
             </label>
-            <button type="submit" className="full">Registrar ocorrência</button>
+            <button type="submit" className="full" disabled={registrando}>{registrando ? "Registrando..." : "Registrar ocorrência"}</button>
           </form>
         </Modal>
       )}
