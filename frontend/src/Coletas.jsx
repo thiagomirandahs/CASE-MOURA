@@ -26,6 +26,37 @@ function Modal({ titulo, onFechar, children }) {
   );
 }
 
+// Popup de aviso/erro: aparece por cima e exige um "OK" pra fechar (o usuário não perde a mensagem).
+function Aviso({ mensagem, onFechar }) {
+  return (
+    <div className="modal-overlay" onClick={onFechar}>
+      <div className="modal modal-aviso" onClick={(e) => e.stopPropagation()}>
+        <div className="aviso-icone">!</div>
+        <h3>Atenção</h3>
+        <p>{mensagem}</p>
+        <button onClick={onFechar} autoFocus>OK</button>
+      </div>
+    </div>
+  );
+}
+
+// Confirmação para ações destrutivas (ex.: cancelar) — no estilo do app, não o popup nativo do navegador.
+function Confirmacao({ mensagem, textoConfirmar, onConfirmar, onCancelar }) {
+  return (
+    <div className="modal-overlay" onClick={onCancelar}>
+      <div className="modal modal-aviso" onClick={(e) => e.stopPropagation()}>
+        <div className="aviso-icone">!</div>
+        <h3>Tem certeza?</h3>
+        <p>{mensagem}</p>
+        <div className="aviso-acoes">
+          <button className="secundario" onClick={onCancelar} autoFocus>Voltar</button>
+          <button className="perigo" onClick={onConfirmar}>{textoConfirmar}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const FORM_COLETA = {
   clienteId: "", remetenteNome: "", remetenteEndereco: "",
   destinatarioNome: "", destinatarioEndereco: "",
@@ -53,6 +84,7 @@ export default function Coletas() {
   const [atribuirForm, setAtribuirForm] = useState({ motoristaId: "", veiculoId: "" });
   const [ocorrenciaColetaId, setOcorrenciaColetaId] = useState(null);
   const [novaOcorrencia, setNovaOcorrencia] = useState("");
+  const [confirmar, setConfirmar] = useState(null);
 
   async function carregar() {
     setCarregando(true);
@@ -147,9 +179,11 @@ export default function Coletas() {
   }
 
   function cancelar(id) {
-    if (window.confirm("Cancelar esta coleta? Essa ação não pode ser desfeita.")) {
-      acao(() => cancelarColeta(id));
-    }
+    setConfirmar({
+      mensagem: "Cancelar esta coleta? Essa ação não pode ser desfeita.",
+      textoConfirmar: "Sim, cancelar",
+      aoConfirmar: () => acao(() => cancelarColeta(id)),
+    });
   }
 
   const termo = busca.trim().toLowerCase();
@@ -196,8 +230,6 @@ export default function Coletas() {
         {temFiltro && <button className="secundario" onClick={limparFiltros}>Limpar</button>}
         <input className="busca" placeholder="Buscar nesta página..." value={busca} onChange={(e) => setBusca(e.target.value)} />
       </div>
-
-      {erro && <p className="erro">⚠ {erro}</p>}
 
       {carregando ? (
         <p>Carregando...</p>
@@ -349,6 +381,17 @@ export default function Coletas() {
             <button type="submit" className="full">Registrar ocorrência</button>
           </form>
         </Modal>
+      )}
+
+      {erro && <Aviso mensagem={erro} onFechar={() => setErro(null)} />}
+
+      {confirmar && (
+        <Confirmacao
+          mensagem={confirmar.mensagem}
+          textoConfirmar={confirmar.textoConfirmar}
+          onConfirmar={() => { confirmar.aoConfirmar(); setConfirmar(null); }}
+          onCancelar={() => setConfirmar(null)}
+        />
       )}
     </div>
   );
