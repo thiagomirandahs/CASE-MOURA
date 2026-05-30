@@ -86,6 +86,7 @@ export default function Coletas() {
   const [novaOcorrencia, setNovaOcorrencia] = useState("");
   const [confirmar, setConfirmar] = useState(null);
   const [registrando, setRegistrando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
 
   async function carregar() {
     setCarregando(true);
@@ -146,26 +147,42 @@ export default function Coletas() {
     }
   }
 
-  function criar(e) {
+  async function criar(e) {
     e.preventDefault();
-    acao(async () => {
+    if (salvando) return; // trava criacao duplicada (double-click)
+    setSalvando(true);
+    setErro(null);
+    try {
       await criarColeta({ ...formColeta, clienteId: Number(formColeta.clienteId) });
       setFormColeta(FORM_COLETA);
       setModalNova(false);
-    });
+      await carregar();
+    } catch (err) {
+      setErro(err.message);
+    } finally {
+      setSalvando(false);
+    }
   }
 
-  function confirmarAtribuir(e) {
+  async function confirmarAtribuir(e) {
     e.preventDefault();
+    if (salvando) return;
     const id = atribuirId;
-    acao(async () => {
+    setSalvando(true);
+    setErro(null);
+    try {
       await atribuirMotoristaVeiculo(id, {
         motoristaId: Number(atribuirForm.motoristaId),
         veiculoId: Number(atribuirForm.veiculoId),
       });
       setAtribuirId(null);
       setAtribuirForm({ motoristaId: "", veiculoId: "" });
-    });
+      await carregar();
+    } catch (err) {
+      setErro(err.message);
+    } finally {
+      setSalvando(false);
+    }
   }
 
   async function adicionarOcorrencia(e) {
@@ -343,7 +360,7 @@ export default function Coletas() {
               <input placeholder="Ex.: carga frágil" value={formColeta.observacoes} onChange={(e) => setFormColeta({ ...formColeta, observacoes: e.target.value })} />
             </label>
 
-            <button type="submit" className="full">Criar coleta</button>
+            <button type="submit" className="full" disabled={salvando}>{salvando ? "Criando..." : "Criar coleta"}</button>
           </form>
         </Modal>
       )}
@@ -366,7 +383,7 @@ export default function Coletas() {
               </select>
             </label>
             <p className="aviso-modal">Ao atribuir, a coleta passa para <strong>Em Coleta</strong>.</p>
-            <button type="submit" className="full">Atribuir</button>
+            <button type="submit" className="full" disabled={salvando}>{salvando ? "Atribuindo..." : "Atribuir"}</button>
           </form>
         </Modal>
       )}
