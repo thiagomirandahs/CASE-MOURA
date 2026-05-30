@@ -152,6 +152,23 @@ public class ColetaService : IColetaService
         return valor;
     }
 
+    // Fuso de Brasilia (UTC-3). Tenta achar pelo sistema; senao, usa -3h fixo (BR nao tem horario de verao desde 2019).
+    private static readonly TimeZoneInfo FusoBrasil = ObterFusoBrasil();
+
+    private static TimeZoneInfo ObterFusoBrasil()
+    {
+        foreach (var id in new[] { "America/Sao_Paulo", "E. South America Standard Time" })
+        {
+            try { return TimeZoneInfo.FindSystemTimeZoneById(id); }
+            catch { /* tenta o proximo id */ }
+        }
+        return TimeZoneInfo.CreateCustomTimeZone("BRT", TimeSpan.FromHours(-3), "Horario de Brasilia", "BRT");
+    }
+
+    // Converte um horario guardado em UTC para o de Brasilia (pra exibir e exportar com a hora certa).
+    private static DateTime ParaBrasil(DateTime dataUtc) =>
+        TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(dataUtc, DateTimeKind.Utc), FusoBrasil);
+
     private static ColetaResponse MapToResponse(SolicitacaoColeta c) => new(
         c.Id,
         c.Numero,
@@ -161,7 +178,7 @@ public class ColetaService : IColetaService
         c.RemetenteEndereco,
         c.DestinatarioNome,
         c.DestinatarioEndereco,
-        c.DataSolicitacao,
+        ParaBrasil(c.DataSolicitacao),
         c.DataColetaPrevista,
         c.Prioridade.ToString(),
         c.Status.ToString(),
@@ -173,6 +190,6 @@ public class ColetaService : IColetaService
         c.Veiculo?.Placa,
         c.Observacoes,
         c.Ocorrencias
-            .Select(o => new OcorrenciaResponse(o.Id, o.Descricao, o.DataHora, o.UsuarioResponsavel))
+            .Select(o => new OcorrenciaResponse(o.Id, o.Descricao, ParaBrasil(o.DataHora), o.UsuarioResponsavel))
             .ToList());
 }
