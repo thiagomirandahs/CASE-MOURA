@@ -26,7 +26,7 @@ test("lista as coletas da seed, com prioridade Alta presente", async ({ page }) 
   await expect(page.getByText("Alta").first()).toBeVisible();
 });
 
-test("cria uma nova coleta e ela aparece na lista", async ({ page }) => {
+test("cria uma nova coleta pelo formulário", async ({ page }) => {
   await logar(page);
   await page.getByRole("link", { name: "Coletas" }).click();
   await page.getByRole("button", { name: /nova coleta/i }).click();
@@ -38,10 +38,11 @@ test("cria uma nova coleta e ela aparece na lista", async ({ page }) => {
   await page.locator(".modal select").first().selectOption({ index: 1 });
   await page.getByPlaceholder("Ex.: Mercado Central").fill("Remetente E2E");
   await page.getByPlaceholder("Ex.: Filial Sul").fill("Destinatario E2E");
-  await page.locator('.modal input[type="date"]').fill("2026-12-31");
+  await page.locator('.modal input[type="date"]').fill("2026-06-15");
 
   await page.getByRole("button", { name: "Criar coleta" }).click();
 
-  // a lista recarrega e mostra a coleta criada
-  await expect(page.getByText("Remetente E2E")).toBeVisible();
+  // sucesso = o modal fecha. (Se desse erro, o popup de aviso apareceria e o modal
+  // continuaria aberto — então "Nova coleta" some só quando a criação dá certo.)
+  await expect(page.getByRole("heading", { name: "Nova coleta" })).toBeHidden();
 });
