@@ -104,8 +104,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // No startup: aplica as migrations (cria/atualiza as tabelas) e popula o seed inicial.
-using (var scope = app.Services.CreateScope())
+// Nos testes de integração (ambiente "Testing"), quem cuida do banco é a fábrica de teste.
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     // O banco pode demorar a ficar pronto (ex.: subindo junto no Docker). Tenta algumas vezes.
@@ -148,3 +150,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Necessário para os testes de integração (WebApplicationFactory) enxergarem a classe Program.
+public partial class Program { }
