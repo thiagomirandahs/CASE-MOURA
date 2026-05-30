@@ -13,6 +13,11 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Em nuvem (ex.: Render), a plataforma define a porta pela variavel de ambiente PORT.
+var portaHost = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(portaHost))
+    builder.WebHost.UseUrls($"http://0.0.0.0:{portaHost}");
+
 // Serilog — logs estruturados no console e em arquivo (um por dia, na pasta logs/).
 builder.Host.UseSerilog((context, config) => config
     .WriteTo.Console()
@@ -62,9 +67,12 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Banco de dados (EF Core + SQL Server)
+// Banco de dados (EF Core) — SQL Server no local/Docker, PostgreSQL na nuvem.
+var dbProvider = builder.Configuration["DatabaseProvider"] ?? "SqlServer";
+if (string.Equals(dbProvider, "Postgres", StringComparison.OrdinalIgnoreCase))
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); // datas sem fuso: evita erro de Kind
 builder.Services.AddInfrastructure(
-    builder.Configuration.GetConnectionString("DefaultConnection")!);
+    builder.Configuration.GetConnectionString("DefaultConnection")!, dbProvider);
 
 // Casos de uso da aplicação
 builder.Services.AddScoped<IColetaService, ColetaService>();
@@ -101,9 +109,16 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     // O banco pode demorar a ficar pronto (ex.: subindo junto no Docker). Tenta algumas vezes.
+    var ehPostgres = string.Equals(dbProvider, "Postgres", StringComparison.OrdinalIgnoreCase);
     for (var tentativa = 1; ; tentativa++)
     {
-        try { await db.Database.MigrateAsync(); break; }
+        try
+        {
+            // No Postgres (nuvem) cria o schema pelo modelo; no SQL Server aplica as migrations.
+            if (ehPostgres) await db.Database.EnsureCreatedAsync();
+            else await db.Database.MigrateAsync();
+            break;
+        }
         catch when (tentativa < 10) { await Task.Delay(TimeSpan.FromSeconds(5)); }
     }
 
