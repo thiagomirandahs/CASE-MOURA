@@ -134,7 +134,7 @@ O sistema é protegido por JWT. O usuário de demonstração é:
 dotnet test
 ```
 
-São 41 testes (xUnit): as regras de transição de status no domínio, as validações das entidades (coleta, ocorrência, cliente, motorista, veículo) e o `ColetaService` testado com Moq (mock do repositório).
+São **47 testes** no total: **41 unitários** (regras de transição de status no domínio, validações das entidades e o `ColetaService` testado com Moq) e **6 de integração** que sobem a API de verdade (via `WebApplicationFactory` + SQLite em memória) e testam os endpoints HTTP de ponta a ponta.
 
 ## A API
 
