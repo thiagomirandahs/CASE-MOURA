@@ -1,10 +1,12 @@
 using GestaoColetas.Application.DTOs;
 using GestaoColetas.Application.Services;
 using GestaoColetas.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GestaoColetas.WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ColetasController : ControllerBase
@@ -15,14 +17,16 @@ public class ColetasController : ControllerBase
 
     /// <summary>Lista as coletas, com filtros opcionais por situação, cliente e período.</summary>
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ColetaResponse>>> Listar(
+    public async Task<ActionResult<PagedResult<ColetaResponse>>> Listar(
         [FromQuery] StatusColeta? status,
         [FromQuery] int? clienteId,
         [FromQuery] DateTime? inicio,
-        [FromQuery] DateTime? fim)
+        [FromQuery] DateTime? fim,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanhoPagina = 20)
     {
-        var coletas = await _service.ListarAsync(status, clienteId, inicio, fim);
-        return Ok(coletas);
+        var resultado = await _service.ListarAsync(status, clienteId, inicio, fim, pagina, tamanhoPagina);
+        return Ok(resultado);
     }
 
     /// <summary>Busca uma coleta pelo id.</summary>
@@ -69,7 +73,8 @@ public class ColetasController : ControllerBase
     [HttpPost("{id:int}/ocorrencias")]
     public async Task<IActionResult> RegistrarOcorrencia(int id, [FromBody] RegistrarOcorrenciaRequest request)
     {
-        await _service.RegistrarOcorrenciaAsync(id, request);
+        var usuario = User.Identity?.Name ?? "desconhecido";
+        await _service.RegistrarOcorrenciaAsync(id, request.Descricao, usuario);
         return NoContent();
     }
 }

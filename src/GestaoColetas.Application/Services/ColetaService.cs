@@ -30,11 +30,15 @@ public class ColetaService : IColetaService
         return MapToResponse(criada!);
     }
 
-    public async Task<IReadOnlyList<ColetaResponse>> ListarAsync(
-        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim)
+    public async Task<PagedResult<ColetaResponse>> ListarAsync(
+        StatusColeta? status, int? clienteId, DateTime? inicio, DateTime? fim, int pagina, int tamanhoPagina)
     {
-        var coletas = await _repo.ListarAsync(status, clienteId, inicio, fim);
-        return coletas.Select(MapToResponse).ToList();
+        if (pagina < 1) pagina = 1;
+        if (tamanhoPagina < 1 || tamanhoPagina > 100) tamanhoPagina = 20;
+
+        var (itens, total) = await _repo.ListarAsync(status, clienteId, inicio, fim, pagina, tamanhoPagina);
+        var resposta = itens.Select(MapToResponse).ToList();
+        return new PagedResult<ColetaResponse>(resposta, total, pagina, tamanhoPagina);
     }
 
     public async Task<ColetaResponse?> ObterPorIdAsync(int id)
@@ -70,12 +74,14 @@ public class ColetaService : IColetaService
         await _repo.SalvarAlteracoesAsync();
     }
 
-    public async Task RegistrarOcorrenciaAsync(int id, RegistrarOcorrenciaRequest req)
+    public async Task RegistrarOcorrenciaAsync(int id, string descricao, string usuarioResponsavel)
     {
         var coleta = await ObterOuFalharAsync(id);
-        coleta.RegistrarOcorrencia(req.Descricao, req.UsuarioResponsavel); // regra no domínio
+        coleta.RegistrarOcorrencia(descricao, usuarioResponsavel); // regra no domínio
         await _repo.SalvarAlteracoesAsync();
     }
+
+    public Task<DashboardResponse> ObterDashboardAsync() => _repo.ObterDashboardAsync();
 
     private async Task<SolicitacaoColeta> ObterOuFalharAsync(int id)
     {
@@ -105,6 +111,7 @@ public class ColetaService : IColetaService
         c.Prioridade.ToString(),
         c.Status.ToString(),
         c.Prioridade == Prioridade.Alta,
+        c.Status != StatusColeta.Coletado && c.Status != StatusColeta.Cancelada && c.DataColetaPrevista < DateTime.UtcNow,
         c.MotoristaId,
         c.Motorista?.Nome,
         c.VeiculoId,
