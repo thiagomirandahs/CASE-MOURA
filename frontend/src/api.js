@@ -82,3 +82,28 @@ export const listarVeiculos = () => req("/api/veiculos");
 
 // ----- Dashboard -----
 export const getDashboard = () => req("/api/dashboard");
+
+// ----- Exportação (baixa um CSV que abre no Excel) -----
+export async function exportarColetas({ status, clienteId, inicio, fim } = {}) {
+  const p = new URLSearchParams();
+  if (status) p.append("status", status);
+  if (clienteId) p.append("clienteId", clienteId);
+  if (inicio) p.append("inicio", inicio);
+  if (fim) p.append("fim", fim);
+
+  const resp = await fetch(`${API_URL}/api/coletas/exportar?${p}`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  if (!resp.ok) throw new Error("Não foi possível exportar as coletas.");
+
+  // transforma a resposta em arquivo e dispara o download no navegador
+  const blob = await resp.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "coletas.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
