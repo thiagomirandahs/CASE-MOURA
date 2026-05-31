@@ -1,30 +1,27 @@
 # CASE-MOURA — Gestão de Coletas
 
-Sistema interno pra uma transportadora organizar as solicitações de coleta, desde
-quando o pedido é aberto até a confirmação de que a carga foi coletada. A ideia é
-tirar esse controle das planilhas e do WhatsApp e centralizar num lugar só, com
-rastreabilidade do que acontece em cada coleta.
+Sistema interno para uma transportadora organizar as solicitações de coleta, desde a abertura do pedido até a confirmação de que a carga foi coletada. O objetivo é remover esse controle de planilhas e do WhatsApp e centralizá-lo em um único lugar, com rastreabilidade do que ocorre em cada coleta.
 
-> Projeto do case técnico pra vaga de Desenvolvedor Web Jr.
+> Projeto de case técnico para a vaga de Desenvolvedor Web Jr.
 
 ## Demo ao vivo
 
-- **Aplicação:** https://case-moura-web.onrender.com — entre com **admin** / **admin123**
+- **Aplicação:** https://case-moura-web.onrender.com — acesse com **admin** / **admin123**
 - **API (Swagger):** https://case-moura.onrender.com/swagger/index.html
 
-> Está numa hospedagem gratuita que "dorme" quando fica parada: a primeira visita pode levar uns ~50s pra acordar (se aparecer "Not Found", é só recarregar uma vez).
+> A aplicação está em hospedagem gratuita, que entra em suspensão quando ociosa: a primeira visita pode levar cerca de 50 segundos para iniciar (caso apareça "Not Found", basta recarregar a página).
 
-## O que dá pra fazer
+## Funcionalidades
 
-- Abrir uma solicitação de coleta (cliente, remetente, destinatário, data prevista e prioridade)
-- Acompanhar o status de cada coleta: **Aberta → Em Coleta → Coletado**, ou **Cancelada**
-- Atribuir motorista e veículo (é isso que move a coleta pra "Em Coleta")
-- Marcar como coletada e cancelar, sempre respeitando as regras de negócio
-- Registrar **ocorrências** (ex.: endereço errado, cliente ausente), guardando data/hora e quem registrou
-- Filtrar a lista por situação, cliente e período, com busca e paginação
-- Ver um **dashboard** com indicadores (total, por status, em atraso, alta prioridade e taxa de conclusão)
-- **Exportar** as coletas em CSV (abre no Excel)
-- Entrar com login (autenticação JWT)
+- Abertura de solicitação de coleta (cliente, remetente, destinatário, data prevista e prioridade)
+- Acompanhamento do status de cada coleta: **Aberta → Em Coleta → Coletado**, ou **Cancelada**
+- Atribuição de motorista e veículo (ação que move a coleta para "Em Coleta")
+- Marcação como coletada e cancelamento, sempre respeitando as regras de negócio
+- Registro de **ocorrências** (ex.: endereço incorreto, cliente ausente), com data/hora e responsável
+- Filtro da lista por situação, cliente e período, com busca e paginação
+- **Dashboard** com indicadores (total, por status, em atraso, alta prioridade e taxa de conclusão)
+- **Exportação** das coletas em CSV (compatível com o Excel)
+- Acesso autenticado (JWT)
 
 ## Tecnologias
 
@@ -35,9 +32,9 @@ rastreabilidade do que acontece em cada coleta.
 - Logs: Serilog
 - Documentação da API: Swagger
 - Testes: xUnit
-- Infra: Docker e Docker Compose
+- Infraestrutura: Docker e Docker Compose
 
-## Como o projeto está organizado
+## Organização do projeto
 
 O back-end segue Clean Architecture, separado em camadas:
 
@@ -49,29 +46,26 @@ src/
   GestaoColetas.WebAPI          a API: controllers e configuração
 tests/
   GestaoColetas.Tests           testes das regras de negócio (xUnit)
-frontend/                       o front em React
+frontend/                       o front-end em React
 ```
 
-A regra principal: as camadas de fora dependem das de dentro, e o Domain não depende
-de ninguém — assim as regras ficam isoladas e fáceis de testar. O porquê de cada
-escolha eu escrevi em [docs/DECISOES.md](docs/DECISOES.md).
+Princípio central: as camadas externas dependem das internas, e o Domain não depende de nenhuma outra — assim as regras permanecem isoladas e testáveis. A justificativa de cada escolha está em [docs/DECISOES.md](docs/DECISOES.md).
 
-## As regras de negócio (o coração do sistema)
+## Regras de negócio (núcleo do sistema)
 
-Essas regras moram dentro da própria entidade `SolicitacaoColeta`, não espalhadas pela aplicação:
+As regras residem na própria entidade `SolicitacaoColeta`, e não dispersas pela aplicação:
 
-- O status só anda pelo caminho certo: **Aberta → Em Coleta → Coletado**, ou **Cancelada**
-- **Cancelada é ponto final**: uma coleta cancelada não volta pro fluxo
-- Só dá pra marcar como **Coletado** se tiver motorista **E** veículo vinculados
-- Toda **ocorrência** guarda data/hora e o usuário responsável
-- Coleta de prioridade **Alta** aparece destacada e no topo da lista
+- O status percorre apenas o fluxo válido: **Aberta → Em Coleta → Coletado**, ou **Cancelada**
+- **Cancelada é estado terminal**: uma coleta cancelada não retorna ao fluxo
+- Só é possível marcar como **Coletado** com motorista **E** veículo vinculados
+- Toda **ocorrência** registra data/hora e o usuário responsável
+- Coletas de prioridade **Alta** aparecem destacadas e no topo da lista
 
-## Como rodar
+## Como executar
 
-Precisa ter o Docker e o .NET 8 instalados. Se for montar a máquina do zero, anotei o
-passo a passo em [docs/AMBIENTE.md](docs/AMBIENTE.md).
+É necessário ter o Docker e o .NET 8 instalados. O passo a passo para preparar a máquina do zero está em [docs/AMBIENTE.md](docs/AMBIENTE.md).
 
-### Opção 1 — Docker (sobe o banco + a API juntos)
+### Opção 1 — Docker (banco + API juntos)
 
 Na raiz do projeto:
 
@@ -79,21 +73,21 @@ Na raiz do projeto:
 docker compose up --build
 ```
 
-Sobe o SQL Server e a API. Quando terminar de subir, a API fica em:
+Sobe o SQL Server e a API. Após a inicialização, a API fica disponível em:
 
 - Swagger: http://localhost:8080/swagger
 
-Pra parar: `docker compose down`.
+Para encerrar: `docker compose down`.
 
-### Opção 2 — Rodar local (pra desenvolver)
+### Opção 2 — Execução local (desenvolvimento)
 
-1. Subir só o banco (SQL Server num contêiner):
+1. Suba apenas o banco (SQL Server em contêiner):
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=GestaoColetas@2026" -p 1433:1433 -d --name sql-gestaocoletas mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-2. Rodar a API (na porta 5080, que é a que o front procura):
+2. Execute a API (na porta 5080, utilizada pelo front-end):
 
 ```bash
 dotnet run --project src/GestaoColetas.WebAPI --urls http://localhost:5080
@@ -101,7 +95,7 @@ dotnet run --project src/GestaoColetas.WebAPI --urls http://localhost:5080
 
 Swagger em http://localhost:5080/swagger.
 
-> Na primeira vez, a API cria o banco (migrations) e popula com dados de exemplo (seed) sozinha.
+> Na primeira execução, a API cria o banco (migrations) e o popula com dados de exemplo (seed) automaticamente.
 
 ### Front-end (React)
 
@@ -113,9 +107,7 @@ npm install
 npm run dev
 ```
 
-O front abre em http://localhost:5173. Por padrão ele conversa com a API em
-`http://localhost:5080` (a opção 2). Se você subiu pela opção 1 (Docker, porta 8080),
-crie um arquivo `frontend/.env` com a linha:
+O front-end abre em http://localhost:5173. Por padrão, comunica-se com a API em `http://localhost:5080` (Opção 2). Caso utilize a Opção 1 (Docker, porta 8080), crie o arquivo `frontend/.env` com a linha:
 
 ```
 VITE_API_URL=http://localhost:8080
@@ -128,33 +120,32 @@ O sistema é protegido por JWT. O usuário de demonstração é:
 - **usuário:** `admin`
 - **senha:** `admin123`
 
-## Rodar os testes
+## Testes
 
 ```bash
 dotnet test
 ```
 
-São **47 testes** no total: **41 unitários** (regras de transição de status no domínio, validações das entidades e o `ColetaService` testado com Moq) e **6 de integração** que sobem a API de verdade (via `WebApplicationFactory` + SQLite em memória) e testam os endpoints HTTP de ponta a ponta.
+São **47 testes** no total: **41 unitários** (regras de transição de status no domínio, validações das entidades e o `ColetaService` testado com Moq) e **6 de integração**, que executam a API real (via `WebApplicationFactory` + SQLite em memória) e testam os endpoints HTTP de ponta a ponta.
 
 ## A API
 
-Com a API no ar, o **Swagger** documenta e deixa testar todos os endpoints (dá pra
-fazer o login por lá e usar o token nos demais). Os principais:
+Com a API em execução, o **Swagger** documenta e permite testar todos os endpoints (incluindo o login e o uso do token nas demais chamadas). Os principais:
 
 | Método | Rota | O que faz |
 |---|---|---|
 | POST | `/api/auth/login` | Autentica e devolve o token JWT |
 | GET | `/api/coletas` | Lista as coletas (filtros, busca e paginação) |
 | POST | `/api/coletas` | Abre uma nova coleta |
-| POST | `/api/coletas/{id}/atribuir` | Atribui motorista e veículo (vai pra "Em Coleta") |
+| POST | `/api/coletas/{id}/atribuir` | Atribui motorista e veículo (vai para "Em Coleta") |
 | POST | `/api/coletas/{id}/coletar` | Marca como coletada |
 | POST | `/api/coletas/{id}/cancelar` | Cancela a coleta |
 | POST | `/api/coletas/{id}/ocorrencias` | Registra uma ocorrência |
 | GET | `/api/coletas/exportar` | Exporta as coletas em CSV |
-| GET | `/api/dashboard` | Os indicadores do dashboard |
+| GET | `/api/dashboard` | Indicadores do dashboard |
 | GET | `/api/clientes` · `/api/motoristas` · `/api/veiculos` | Cadastros (usados nos formulários) |
 
 ## Documentação
 
-- [docs/DECISOES.md](docs/DECISOES.md) — por que cada escolha de arquitetura
-- [docs/AMBIENTE.md](docs/AMBIENTE.md) — como preparei a máquina pra rodar o projeto
+- [docs/DECISOES.md](docs/DECISOES.md) — justificativa de cada escolha de arquitetura
+- [docs/AMBIENTE.md](docs/AMBIENTE.md) — preparação da máquina para executar o projeto
