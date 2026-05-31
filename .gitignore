@@ -485,3 +485,13 @@ $RECYCLE.BIN/
 
 # Logs do Serilog
 logs/
+
+# Prints usados na apresentacao (gerados localmente, nao versionar)
+/coletas.png
+/dashboard.png
+/deploy.png
+/TERMINAL DOTNET.png
+/VS CODE.png
+
+# Script local de preparacao de ambiente (uso no pendrive)
+/instalar-ambiente.bat
