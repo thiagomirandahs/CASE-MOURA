@@ -1,36 +1,32 @@
 # Configuração do ambiente
 
-Aqui anotei como deixei minha máquina pronta pra rodar o projeto, na ordem que fiz.
-Se você quiser rodar do zero (estou no Windows 10), é só seguir os mesmos passos.
+Guia para preparar uma máquina Windows, do zero, para executar o projeto. Os passos foram validados no Windows 10.
 
-## O que o projeto usa
+## Ferramentas necessárias
 
-| Ferramenta | Pra que serve |
+| Ferramenta | Finalidade |
 |---|---|
-| Git | Versionar o código e mandar pro GitHub |
-| .NET 8 SDK | Rodar o back-end (C#) |
-| Node.js + npm | Rodar o front-end (React) |
-| WSL2 | Um Linux interno do Windows que o Docker precisa pra funcionar |
-| Docker Desktop | Subir a API e o banco de dados em contêineres |
+| Git | Controle de versão e integração com o GitHub |
+| .NET 8 SDK | Compilação e execução do back-end (C#) |
+| Node.js + npm | Execução do front-end (React) |
+| WSL2 | Subsistema Linux exigido pelo Docker no Windows |
+| Docker Desktop | Execução da API e do banco de dados em contêineres |
 
-## O que eu já tinha
+## Pré-requisitos
 
-Quando comecei, o Git, o Node.js e o npm já estavam instalados. Eu também tinha o
-.NET 9, mas o case pede o **.NET 8**, então instalei o 8 também. Os dois ficam
-instalados juntos sem conflito, então não precisei desinstalar nada.
+O projeto exige especificamente o **.NET 8 SDK**. Caso a máquina já possua o .NET 9, não é necessário removê-lo: as versões coexistem sem conflito. Git, Node.js e npm também são necessários e podem já estar presentes no ambiente.
 
-## Passo a passo
+## Instalação
 
-Fiz tudo pelo **PowerShell**, usando o `winget` (o instalador de programas que já
-vem no Windows). Quando aparece a janela de permissão do Windows, é só clicar em Sim.
+Os comandos a seguir utilizam o **winget** (gerenciador de pacotes nativo do Windows) e devem ser executados no **PowerShell**. Confirme as solicitações de permissão exibidas pelo sistema.
 
-### 1. .NET 8
+### 1. .NET 8 SDK
 
 ```powershell
 winget install --id Microsoft.DotNet.SDK.8 -e --accept-package-agreements --accept-source-agreements
 ```
 
-Conferi se instalou (no meu caso veio a versão `8.0.421`):
+Verifique a instalação (exemplo de saída: `8.0.421`):
 
 ```powershell
 dotnet --list-sdks
@@ -38,18 +34,13 @@ dotnet --list-sdks
 
 ### 2. WSL2
 
-Aqui eu tomei um perrengue. Tentei instalar o Docker direto e ele baixou tudo, mas
-falhou bem na hora de instalar. Fui atrás e descobri que no Windows o Docker roda em
-cima do **WSL2** (esse Linux interno), e eu não tinha ele.
-
-Então instalei o WSL2 primeiro:
+No Windows, o Docker Desktop depende do WSL2; portanto, instale-o **antes** do Docker:
 
 ```powershell
 wsl --install --no-distribution
 ```
 
-E **reiniciei o PC** — sem reiniciar não adianta, as mudanças só valem depois. Pra
-conferir que ativou (deu versão 2):
+**Reinicie o computador** após a instalação — as alterações do WSL2 só passam a valer após a reinicialização. Em seguida, confirme que a versão 2 está ativa:
 
 ```powershell
 wsl --status
@@ -57,22 +48,21 @@ wsl --status
 
 ### 3. Docker Desktop
 
-Depois de reiniciar, instalei o Docker de novo e aí foi de boa:
+Com o WSL2 ativo, instale o Docker Desktop:
 
 ```powershell
 winget install --id Docker.DockerDesktop -e --accept-package-agreements --accept-source-agreements
 ```
 
-Abri o Docker Desktop uma vez, aceitei os termos e esperei a baleia ficar estável
-(uns 2 minutos na primeira vez). Pra ter certeza que tava tudo certo, rodei:
+Abra o Docker Desktop uma vez, aceite os termos e aguarde a inicialização do serviço (aproximadamente 2 minutos na primeira execução). Valide o funcionamento com:
 
 ```powershell
 docker run hello-world
 ```
 
-Apareceu o "Hello from Docker!", então o Docker tava funcionando de ponta a ponta.
+A mensagem "Hello from Docker!" confirma que o Docker está operacional de ponta a ponta.
 
-## Conferir se está tudo ok
+## Verificação final
 
 ```powershell
 git --version
@@ -81,12 +71,10 @@ node --version
 docker --version
 ```
 
-Se todos responderem com um número de versão, o ambiente tá pronto.
+Se todos os comandos retornarem um número de versão, o ambiente está pronto.
 
-## Uns perrengues que tive (caso aconteça com você)
+## Problemas comuns
 
-- **O Docker não instalava:** era falta do WSL2. Instalei o WSL2 e reiniciei, aí foi.
-- **O terminal não achava o `docker`:** era só o PATH antigo. Fechei e abri um
-  terminal novo e funcionou.
-- **`docker` só funciona com o Docker Desktop aberto:** o motor precisa estar ligado.
-  Deixei o Docker abrir junto com o Windows pra não esquecer.
+- **Falha na instalação do Docker:** normalmente decorre da ausência do WSL2. Instale o WSL2, reinicie a máquina e repita a instalação.
+- **Comando `docker` não reconhecido:** geralmente indica PATH desatualizado na sessão atual. Feche e reabra o terminal.
+- **`docker` exige o Docker Desktop em execução:** o serviço precisa estar ativo. Configure o Docker Desktop para iniciar com o Windows.

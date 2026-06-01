@@ -65,6 +65,11 @@ const FORM_COLETA = {
 
 const FILTROS_VAZIOS = { status: "", clienteId: "", inicio: "", fim: "" };
 
+// Mostra o status com espaço: o valor cru "EmColeta" vira "Em Coleta".
+function rotuloStatus(s) {
+  return s === "EmColeta" ? "Em Coleta" : s;
+}
+
 export default function Coletas() {
   const [resultado, setResultado] = useState({ itens: [], total: 0, pagina: 1, totalPaginas: 0 });
   const [filtros, setFiltros] = useState(FILTROS_VAZIOS);
@@ -282,7 +287,7 @@ export default function Coletas() {
                   <td>{c.remetenteNome} → {c.destinatarioNome}</td>
                   <td>{c.prioridade}</td>
                   <td>
-                    <span className={`status status-${c.status}`}>{c.status}</span>
+                    <span className={`status status-${c.status}`}>{rotuloStatus(c.status)}</span>
                     {c.emAtraso && <span className="badge-atraso">atrasada</span>}
                   </td>
                   <td className={c.emAtraso ? "data-atraso" : ""}>{new Date(c.dataColetaPrevista).toLocaleDateString("pt-BR")}</td>
