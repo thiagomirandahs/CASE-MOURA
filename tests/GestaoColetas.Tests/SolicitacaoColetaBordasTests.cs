@@ -47,16 +47,17 @@ public class SolicitacaoColetaBordasTests
     }
 
     [Fact]
-    public void EmColeta_PodeTrocarMotoristaEVeiculoAntesDeColetar()
+    public void EmColeta_NaoPermiteAtribuirMotoristaEVeiculoDeNovo()
     {
         var coleta = NovaColeta();
-        coleta.AtribuirMotoristaEVeiculo(1, 1);
+        coleta.AtribuirMotoristaEVeiculo(1, 1); // vira "Em Coleta"
 
-        coleta.AtribuirMotoristaEVeiculo(2, 3); // troca antes de coletar
+        // Ja tem motorista e veiculo: atribuir de novo deve ser bloqueado.
+        Assert.Throws<InvalidOperationException>(() => coleta.AtribuirMotoristaEVeiculo(2, 3));
 
-        Assert.Equal(StatusColeta.EmColeta, coleta.Status);
-        Assert.Equal(2, coleta.MotoristaId);
-        Assert.Equal(3, coleta.VeiculoId);
+        // E a atribuicao original permanece intacta.
+        Assert.Equal(1, coleta.MotoristaId);
+        Assert.Equal(1, coleta.VeiculoId);
     }
 
     [Fact]

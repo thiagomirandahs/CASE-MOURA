@@ -84,6 +84,8 @@ public class SolicitacaoColeta
             throw new InvalidOperationException("Não dá para atribuir motorista/veículo a uma coleta cancelada.");
         if (Status == StatusColeta.Coletado)
             throw new InvalidOperationException("Essa coleta já foi concluída.");
+        if (Status == StatusColeta.EmColeta)
+            throw new InvalidOperationException("Essa coleta já tem um motorista e um veículo atribuídos.");
 
         MotoristaId = motoristaId;
         VeiculoId = veiculoId;
