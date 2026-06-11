@@ -18,6 +18,7 @@ Sistema interno para uma transportadora organizar as solicitações de coleta, d
 - Atribuição de motorista e veículo (ação que move a coleta para "Em Coleta")
 - Marcação como coletada e cancelamento, sempre respeitando as regras de negócio
 - Registro de **ocorrências** (ex.: endereço incorreto, cliente ausente), com data/hora e responsável
+- **Cadastro de motoristas e veículos**, usados na atribuição das coletas
 - Filtro da lista por situação, cliente e período, com busca e paginação
 - **Dashboard** com indicadores (total, por status, em atraso, alta prioridade e taxa de conclusão)
 - **Exportação** das coletas em CSV (compatível com o Excel)
@@ -51,12 +52,17 @@ frontend/                       o front-end em React
 
 Princípio central: as camadas externas dependem das internas, e o Domain não depende de nenhuma outra — assim as regras permanecem isoladas e testáveis. A justificativa de cada escolha está em [docs/DECISOES.md](docs/DECISOES.md).
 
+### Como as partes se comunicam
+
+O front-end (React) conversa com a API por **HTTP**, no padrão REST: envia e recebe **JSON** e inclui o **token JWT** no cabeçalho de cada requisição (essas chamadas ficam centralizadas no arquivo `frontend/src/api.js`). O front **não guarda dados de negócio** — mantém apenas o token no `localStorage` do navegador, para a sessão. Os dados em si (coletas, motoristas, veículos) ficam no **banco de dados**, acessado pela API via EF Core.
+
 ## Regras de negócio (núcleo do sistema)
 
 As regras residem na própria entidade `SolicitacaoColeta`, e não dispersas pela aplicação:
 
 - O status percorre apenas o fluxo válido: **Aberta → Em Coleta → Coletado**, ou **Cancelada**
 - **Cancelada é estado terminal**: uma coleta cancelada não retorna ao fluxo
+- Motorista e veículo são atribuídos **uma única vez**: uma coleta que já está **Em Coleta** não aceita nova atribuição
 - Só é possível marcar como **Coletado** com motorista **E** veículo vinculados
 - Toda **ocorrência** registra data/hora e o usuário responsável
 - Coletas de prioridade **Alta** aparecem destacadas e no topo da lista
@@ -143,7 +149,8 @@ Com a API em execução, o **Swagger** documenta e permite testar todos os endpo
 | POST | `/api/coletas/{id}/ocorrencias` | Registra uma ocorrência |
 | GET | `/api/coletas/exportar` | Exporta as coletas em CSV |
 | GET | `/api/dashboard` | Indicadores do dashboard |
-| GET | `/api/clientes` · `/api/motoristas` · `/api/veiculos` | Cadastros (usados nos formulários) |
+| GET · POST | `/api/motoristas` · `/api/veiculos` | Lista e cadastra motoristas e veículos |
+| GET | `/api/clientes` | Lista os clientes (usados nos formulários) |
 
 ## Documentação
 
