@@ -75,10 +75,15 @@ export const cancelarColeta = (id) =>
 export const registrarOcorrencia = (id, descricao) =>
   req(`/api/coletas/${id}/ocorrencias`, { method: "POST", body: JSON.stringify({ descricao }) });
 
-// ----- Cadastros (para os dropdowns) -----
+// ----- Cadastros (para os dropdowns e a tela de cadastros) -----
 export const listarClientes = () => req("/api/clientes");
 export const listarMotoristas = () => req("/api/motoristas");
 export const listarVeiculos = () => req("/api/veiculos");
+
+export const criarMotorista = (dados) =>
+  req("/api/motoristas", { method: "POST", body: JSON.stringify(dados) });
+export const criarVeiculo = (dados) =>
+  req("/api/veiculos", { method: "POST", body: JSON.stringify(dados) });
 
 // ----- Dashboard -----
 export const getDashboard = () => req("/api/dashboard");

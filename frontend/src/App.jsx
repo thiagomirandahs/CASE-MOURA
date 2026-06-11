@@ -4,6 +4,7 @@ import { getToken, logout as apiLogout } from "./api";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Coletas from "./Coletas";
+import Cadastros from "./Cadastros";
 
 export default function App() {
   const [logado, setLogado] = useState(!!getToken());
@@ -22,6 +23,7 @@ export default function App() {
         <div className="nav-links">
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/coletas">Coletas</NavLink>
+          <NavLink to="/cadastros">Cadastros</NavLink>
         </div>
         <button className="secundario" onClick={sair}>Sair</button>
       </nav>
@@ -29,6 +31,7 @@ export default function App() {
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/coletas" element={<Coletas />} />
+          <Route path="/cadastros" element={<Cadastros />} />
           <Route path="*" element={<Navigate to="/coletas" replace />} />
         </Routes>
       </main>
