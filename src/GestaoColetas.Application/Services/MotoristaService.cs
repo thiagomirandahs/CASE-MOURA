@@ -24,7 +24,11 @@ public class MotoristaService : IMotoristaService
 
     public async Task<MotoristaResponse> CriarAsync(CriarMotoristaRequest req)
     {
-        var motorista = new Motorista(req.Nome, req.Cnh); // a validação mora no domínio
+        var cnh = req.Cnh?.Trim() ?? string.Empty;
+        if (await _repo.CnhExisteAsync(cnh))
+            throw new InvalidOperationException("Já existe um motorista cadastrado com essa CNH.");
+
+        var motorista = new Motorista(req.Nome, cnh); // a validação dos campos mora no domínio
         await _repo.AdicionarAsync(motorista);
         await _repo.SalvarAlteracoesAsync();
         return MapToResponse(motorista);
