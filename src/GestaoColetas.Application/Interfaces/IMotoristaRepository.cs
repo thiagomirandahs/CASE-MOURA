@@ -10,6 +10,7 @@ public interface IMotoristaRepository
 {
     Task<IReadOnlyList<Motorista>> ListarAsync();
     Task<Motorista?> ObterPorIdAsync(int id);
+    Task<bool> CnhExisteAsync(string cnh);
     Task AdicionarAsync(Motorista motorista);
     Task SalvarAlteracoesAsync();
 }

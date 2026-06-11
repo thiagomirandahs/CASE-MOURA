@@ -18,7 +18,7 @@ Sistema interno para uma transportadora organizar as solicitações de coleta, d
 - Atribuição de motorista e veículo (ação que move a coleta para "Em Coleta")
 - Marcação como coletada e cancelamento, sempre respeitando as regras de negócio
 - Registro de **ocorrências** (ex.: endereço incorreto, cliente ausente), com data/hora e responsável
-- **Cadastro de motoristas e veículos**, usados na atribuição das coletas
+- **Cadastro de motoristas e veículos** (sem CNH nem placa repetidas), usados na atribuição das coletas
 - Filtro da lista por situação, cliente e período, com busca e paginação
 - **Dashboard** com indicadores (total, por status, em atraso, alta prioridade e taxa de conclusão)
 - **Exportação** das coletas em CSV (compatível com o Excel)
@@ -132,7 +132,7 @@ O sistema é protegido por JWT. O usuário de demonstração é:
 dotnet test
 ```
 
-São **47 testes** no total: **41 unitários** (regras de transição de status no domínio, validações das entidades e o `ColetaService` testado com Moq) e **6 de integração**, que executam a API real (via `WebApplicationFactory` + SQLite em memória) e testam os endpoints HTTP de ponta a ponta.
+São **51 testes** no total: **45 unitários** (regras de transição de status no domínio, validações das entidades e os services testados com Moq) e **6 de integração**, que executam a API real (via `WebApplicationFactory` + SQLite em memória) e testam os endpoints HTTP de ponta a ponta.
 
 ## A API
 

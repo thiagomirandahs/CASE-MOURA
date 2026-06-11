@@ -17,6 +17,10 @@ public class VeiculoRepository : IVeiculoRepository
     public async Task<Veiculo?> ObterPorIdAsync(int id) =>
         await _db.Veiculos.FirstOrDefaultAsync(v => v.Id == id);
 
+    // Compara em maiúsculas para "abc1d23" e "ABC1D23" contarem como a mesma placa.
+    public async Task<bool> PlacaExisteAsync(string placa) =>
+        await _db.Veiculos.AnyAsync(v => v.Placa.ToUpper() == placa);
+
     public async Task AdicionarAsync(Veiculo veiculo) => await _db.Veiculos.AddAsync(veiculo);
 
     public Task SalvarAlteracoesAsync() => _db.SaveChangesAsync();

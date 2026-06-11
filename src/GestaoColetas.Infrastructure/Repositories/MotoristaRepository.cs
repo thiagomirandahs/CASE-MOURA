@@ -20,6 +20,9 @@ public class MotoristaRepository : IMotoristaRepository
     public async Task<Motorista?> ObterPorIdAsync(int id) =>
         await _db.Motoristas.FirstOrDefaultAsync(m => m.Id == id);
 
+    public async Task<bool> CnhExisteAsync(string cnh) =>
+        await _db.Motoristas.AnyAsync(m => m.Cnh == cnh);
+
     public async Task AdicionarAsync(Motorista motorista) =>
         await _db.Motoristas.AddAsync(motorista);
 

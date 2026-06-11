@@ -18,7 +18,11 @@ public class VeiculoService : IVeiculoService
 
     public async Task<VeiculoResponse> CriarAsync(CriarVeiculoRequest req)
     {
-        var veiculo = new Veiculo(req.Placa, req.Modelo);
+        var placa = (req.Placa ?? string.Empty).Trim().ToUpperInvariant();
+        if (await _repo.PlacaExisteAsync(placa))
+            throw new InvalidOperationException("Já existe um veículo cadastrado com essa placa.");
+
+        var veiculo = new Veiculo(placa, req.Modelo); // placa guardada em maiúsculas
         await _repo.AdicionarAsync(veiculo);
         await _repo.SalvarAlteracoesAsync();
         return new VeiculoResponse(veiculo.Id, veiculo.Placa, veiculo.Modelo);
